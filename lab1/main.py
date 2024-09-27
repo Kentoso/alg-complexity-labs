@@ -10,12 +10,19 @@ def main():
         line = line.strip()
 
         if line == "#":
+            palindromes = string_set.find_all_palindromes()
+            print(f"Found {len(palindromes)} palindromes:")
+            print(palindromes)
             break
 
         if count >= 10**6:
             break
 
-        operation, string = line.split()
+        try:
+            operation, string = line.split()
+        except ValueError:
+            print("Invalid input")
+            continue
 
         if operation == "+":
             found = string_set.insert(string)
