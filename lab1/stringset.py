@@ -73,14 +73,14 @@ class StringSet:
 
         palindromes = set()
 
+        # Odd-length palindromes
         for center in range(n):
-            # Odd length palindromes
             low, high = 0, min(center, n - center - 1)
             while low <= high:
                 mid = (low + high) // 2
                 l = center - mid
                 r = center + mid
-                if r >= n:
+                if l < 0 or r >= n:
                     high = mid - 1
                     continue
                 hash_lr = self.substring_hash(
@@ -88,7 +88,7 @@ class StringSet:
                 )
                 rev_l = n - r - 1
                 rev_r = n - l - 1
-                if rev_l < 0 or rev_r >= n:
+                if rev_l > rev_r or rev_l < 0 or rev_r >= n:
                     high = mid - 1
                     continue
                 hash_rev_lr = self.substring_hash(
@@ -99,21 +99,25 @@ class StringSet:
                     low = mid + 1
                 else:
                     high = mid - 1
-            # Even length palindromes
-            low, high = 0, min(center + 1, n - center - 1)
+
+        # Even-length palindromes
+        for center in range(n - 1):
+            low, high = 0, min(center, n - center - 2)
             while low <= high:
                 mid = (low + high) // 2
-                l = center - mid + 1
-                r = center + mid
-                if l > r or l < 0 or r >= n:
+                l = center - mid
+                r = center + mid + 1
+                if l < 0 or r >= n:
                     high = mid - 1
                     continue
+                if l > r:
+                    break
                 hash_lr = self.substring_hash(
                     prefix_hashes_s, l, r, mod_inv_base_powers
                 )
                 rev_l = n - r - 1
                 rev_r = n - l - 1
-                if rev_l < 0 or rev_r >= n:
+                if rev_l > rev_r or rev_l < 0 or rev_r >= n:
                     high = mid - 1
                     continue
                 hash_rev_lr = self.substring_hash(
