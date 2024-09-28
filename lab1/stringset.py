@@ -49,8 +49,8 @@ class StringSet:
             return True
         return False
 
-    def modinv(self, a: int) -> int:
-        return pow(a, self.mod - 2, self.mod)
+    def clear(self) -> None:
+        self.table = [None] * self.size
 
     def substring_hash(
         self, prefix_hashes: list[int], l: int, r: int, mod_inv_base_powers: list[int]
@@ -67,9 +67,7 @@ class StringSet:
 
         prefix_hashes_s = self.hash_function.compute_prefix_hashes(s)
         prefix_hashes_rev_s = self.hash_function.compute_prefix_hashes(s[::-1])
-        base_powers = self.hash_function.base_powers[: n + 1]
-
-        mod_inv_base_powers = [self.modinv(bp) for bp in base_powers]
+        mod_inv_base_powers = self.hash_function.mod_inv_base_powers[: n + 1]
 
         palindromes = set()
 

@@ -3,13 +3,20 @@ class PolynomialHash:
         self.base = base
         self.mod = mod
         self.limit = limit
-        self.base_powers = self._precompute_base_powers()
+        self.base_powers, self.mod_inv_base_powers = self._precompute_base_powers()
+
+    def _modinv(self, a: int) -> int:
+        return pow(a, self.mod - 2, self.mod)
 
     def _precompute_base_powers(self) -> list[int]:
         base_powers = [1] * (self.limit + 1)
+        mod_inv_base_powers = [1] * (self.limit + 1)
+
         for i in range(1, self.limit + 1):
             base_powers[i] = (base_powers[i - 1] * self.base) % self.mod
-        return base_powers
+            mod_inv_base_powers[i] = self._modinv(base_powers[i])
+
+        return base_powers, mod_inv_base_powers
 
     def _get_char_offset(self, char: str) -> int:
         return ord(char) - ord("a") + 1
