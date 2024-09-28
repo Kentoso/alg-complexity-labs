@@ -27,7 +27,7 @@ class StringSet:
         if self.table[index] is None:
             self.table[index] = LinkedList()
         if not self.table[index].search(key):
-            self.table[index].insert(key)
+            self.table[index].insert_at_beginning(key)
             return True
         return False
 
@@ -136,4 +136,4 @@ class StringSet:
                 while current:
                     palindromes |= self._find_palindromes(current.data)
                     current = current.next
-        return sorted(palindromes)
+        return list(palindromes)

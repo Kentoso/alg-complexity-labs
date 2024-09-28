@@ -29,7 +29,7 @@ def generate_random_words(num_words, max_length=15):
 def main():
     start = 1000
     end = 10**6
-    step = 10000
+    step = 100000
     max_word_length = 15
     num_steps = (end - start) // step + 1
 
@@ -66,8 +66,6 @@ def main():
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-
-    plt.savefig("palindrome_execution_time.png")
 
 
 if __name__ == "__main__":
