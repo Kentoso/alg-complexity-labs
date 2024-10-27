@@ -36,3 +36,19 @@ def test_crc_table(message, expected_crc):
     assert (
         crc_calculator.table(message) == expected_crc
     ), f"Failed for message {message}"
+
+
+@pytest.mark.parametrize(
+    "message, expected_crc",
+    [
+        ("1110111001011", "010111001110"),
+        ("1110101011101", "100100100011"),
+        ("1111111111111", "110111100001"),
+        ("", "000000000000"),
+    ],
+)
+def test_crc_reflected_simple(message, expected_crc):
+    crc_calculator = CRC(polynomial)
+    assert (
+        crc_calculator.reflected_simple(message) == expected_crc
+    ), f"Failed for message {message}"

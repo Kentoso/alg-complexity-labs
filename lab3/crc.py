@@ -4,6 +4,7 @@ class CRC:
         self.poly_len = len(self.polynomial)
         self.poly_deg = self.poly_len - 1
         self.crc_table = self._create_crc_table()
+        self.reflected_polynomial = [int(bit) for bit in polynomial[::-1]]
 
     def simple(self, message):
         message = [int(bit) for bit in message]
@@ -64,4 +65,36 @@ class CRC:
             crc = ((crc << 8) ^ self.crc_table[index]) & ((1 << self.poly_deg) - 1)
 
         crc_value = format(crc, f"0{self.poly_deg}b")
+        return crc_value
+
+    def _reflect_bits(self, value, num_bits):
+        result = 0
+        for i in range(num_bits):
+            if (value >> i) & 1:
+                result |= 1 << (num_bits - 1 - i)
+        return result
+
+    def _reflect_byte(self, byte):
+        return self._reflect_bits(byte, 8)
+
+    def reflected_simple(self, message):
+        message = [int(bit) for bit in message]
+
+        message.extend([0] * self.poly_deg)
+
+        register = message[: self.poly_len]
+
+        for i in range(len(message) - self.poly_deg):
+            if register[-1] == 1:
+                register = [
+                    reg_bit ^ poly_bit
+                    for reg_bit, poly_bit in zip(register, self.reflected_polynomial)
+                ]
+
+            if i + self.poly_len < len(message):
+                register = [message[i + self.poly_len]] + register[:-1]
+            else:
+                register = [0] + register[:-1]
+
+        crc_value = "".join(str(bit) for bit in register[-self.poly_deg :])
         return crc_value
