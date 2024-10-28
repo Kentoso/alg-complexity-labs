@@ -96,24 +96,21 @@ class CRC:
 
     def reflected_simple(self, message):
         message = [int(bit) for bit in message]
-
         message.extend([0] * self.poly_deg)
 
         register = message[: self.poly_len]
 
         for i in range(len(message) - self.poly_deg):
             if register[-1] == 1:
-                register = [
-                    reg_bit ^ poly_bit
-                    for reg_bit, poly_bit in zip(register, self.reflected_polynomial)
-                ]
+                for j in range(self.poly_len):
+                    register[-(j + 1)] ^= self.polynomial[j]
 
             if i + self.poly_len < len(message):
                 register = [message[i + self.poly_len]] + register[:-1]
             else:
                 register = [0] + register[:-1]
 
-        crc_value = "".join(str(bit) for bit in register[-self.poly_deg :])[::-1]
+        crc_value = "".join(str(bit) for bit in register[: self.poly_deg])
         return crc_value
 
     def reflected_table(self, message):
