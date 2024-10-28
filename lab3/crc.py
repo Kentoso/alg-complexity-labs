@@ -43,18 +43,11 @@ class CRC:
 
     def _create_reflected_crc_table(self):
         table = []
-        reflected_poly = int("".join(map(str, self.reflected_polynomial)), 2)
-
-        for dividend in range(256):
-            cur_byte = dividend << (self.poly_deg - 8)
-            for _ in range(8):
-                if cur_byte & (1 << (self.poly_deg - 1)):
-                    cur_byte = (
-                        (cur_byte << 1) & ((1 << self.poly_deg) - 1)
-                    ) ^ reflected_poly
-                else:
-                    cur_byte = (cur_byte << 1) & ((1 << self.poly_deg) - 1)
-            table.append(cur_byte)
+        for byte in range(256):
+            table_value = self.crc_table[byte]
+            reversed_table_value = self._reflect_bits(table_value, self.poly_deg + 1)
+            reversed_table_value >>= 1
+            table.append(reversed_table_value)
         return table
 
     def _bits_to_bytes(self, bits):
@@ -112,4 +105,27 @@ class CRC:
         return crc_value
 
     def reflected_table(self, message):
-        return self.table(message[::-1])
+        message_bits = [int(bit) for bit in message]
+        message_bytes = self._bits_to_bytes(message_bits)
+
+        crc = 0
+
+        for byte in message_bytes:
+            index = (crc ^ byte) & 0xFF
+            print(
+                format(crc >> 8, f"0{self.poly_deg}b"),
+                format(crc, f"0{self.poly_deg}b"),
+            )
+            crc = (crc >> 8) ^ self.reflected_crc_table[index]
+
+            print(f"--byte: {format(byte, '08b')}")
+            print(f"--index: {index}")
+            print(
+                f"--table: {format(self.reflected_crc_table[index], f'0{self.poly_deg}b')}"
+            )
+
+        crc &= (1 << self.poly_deg) - 1
+        reflected_crc = self._reflect_bits(crc, self.poly_deg)
+
+        crc_value = format(reflected_crc, f"0{self.poly_deg}b")
+        return crc_value
