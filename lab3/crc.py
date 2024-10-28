@@ -43,11 +43,19 @@ class CRC:
 
     def _create_reflected_crc_table(self):
         table = []
+        polynomial_int = int("".join(map(str, self.reflected_polynomial)), 2)
         for byte in range(256):
-            table_value = self.crc_table[byte]
-            reversed_table_value = self._reflect_bits(table_value, self.poly_deg + 1)
-            reversed_table_value >>= 1
-            table.append(reversed_table_value)
+            register = byte
+            for _ in range(8):
+                if register & 1:
+                    register = (register >> 1) ^ (
+                        polynomial_int
+                        << (self.poly_deg - len(self.reflected_polynomial) + 1)
+                    )
+                else:
+                    register >>= 1
+                register &= (1 << self.poly_deg) - 1
+            table.append(register)
         return table
 
     def _bits_to_bytes(self, bits):
@@ -107,25 +115,17 @@ class CRC:
     def reflected_table(self, message):
         message_bits = [int(bit) for bit in message]
         message_bytes = self._bits_to_bytes(message_bits)
+        message_bytes = [self._reflect_byte(byte) for byte in message_bytes]
 
         crc = 0
 
         for byte in message_bytes:
             index = (crc ^ byte) & 0xFF
-            print(
-                format(crc >> 8, f"0{self.poly_deg}b"),
-                format(crc, f"0{self.poly_deg}b"),
-            )
-            crc = (crc >> 8) ^ self.reflected_crc_table[index]
-
-            print(f"--byte: {format(byte, '08b')}")
-            print(f"--index: {index}")
-            print(
-                f"--table: {format(self.reflected_crc_table[index], f'0{self.poly_deg}b')}"
+            crc = (self.reflected_crc_table[index] ^ (crc >> 8)) & (
+                (1 << self.poly_deg) - 1
             )
 
-        crc &= (1 << self.poly_deg) - 1
-        reflected_crc = self._reflect_bits(crc, self.poly_deg)
-
-        crc_value = format(reflected_crc, f"0{self.poly_deg}b")
+        crc_bits = format(crc, f"0{self.poly_deg}b")
+        crc_bits = crc_bits[::-1]
+        crc_value = crc_bits
         return crc_value
